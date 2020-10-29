@@ -1,0 +1,50 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container: ros:foxy
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Rust
+      run: |
+        curl https://sh.rustup.rs -sSf > rustup.sh
+        chmod +x rustup.sh
+        ./rustup.sh --profile minimal -y 
+
+    - name: Install APT dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          libclang-dev \
+          llvm-dev \
+          python3-colcon-common-extensions \
+          python3-vcstool
+    - name: Setup workspace
+      run: |
+        mkdir -p dependencies
+        vcs import src < ./ros2_rust.repos
+
+    - name: Build
+      shell: bash
+      run: |
+        source /opt/ros/foxy/setup.bash
+        colcon build
+
+    - name: Build
+      shell: bash
+      run: |
+        source /opt/ros/foxy/setup.bash
+        colcon test
