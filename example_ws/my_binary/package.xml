@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rclrs_common</name>
-  <version>0.0.3</version>
+  <name>my_binary</name>
+  <version>0.0.1</version>
   <description>Common files for the Rust client.</description>
   <author email="esteve@apache.org">Esteve Fernandez</author>
   <maintainer email="esteve@apache.org">Esteve Fernandez</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>cargo-ros-install</buildtool_depend>
+  
+  <build_depend>my_second_lib</build_depend>
 
   <export>
     <build_type>ament_cargo</build_type>
