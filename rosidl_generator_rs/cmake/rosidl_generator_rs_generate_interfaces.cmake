@@ -15,7 +15,6 @@
 find_package(rmw_implementation_cmake REQUIRED)
 find_package(rmw REQUIRED)
 find_package(ament_cmake_export_crates REQUIRED)
-find_package(rclrs_common REQUIRED)
 
 if(NOT WIN32)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -143,11 +142,14 @@ set(_target_suffix "__rs")
 
 set(_crate_deps "")
 set(CRATES_DEPENDENCIES "")
-find_package(rclrs_common REQUIRED)
-foreach(_crate_dep ${rclrs_common_CRATES})
-  list(APPEND _crate_deps "${_crate_dep}")
-  set(CRATES_DEPENDENCIES "${CRATES_DEPENDENCIES}\nrclrs_common = { path = '${rclrs_common_CRATES}' }")
-endforeach()
+set(_rclrs_common_prefix "")
+ament_index_has_resource(_rclrs_common_prefix "packages" "rclrs_common")
+if (NOT _rclrs_common_prefix)
+  message(FATAL_ERROR "rclrs_common not found")
+endif()
+set(_rclrs_common_crate "${_rclrs_common_prefix}/share/rclrs_common/rust")
+list(APPEND _crate_deps "${_crate_dep}")
+set(CRATES_DEPENDENCIES "${CRATES_DEPENDENCIES}\nrclrs_common = { path = '${_rclrs_common_crate}' }")
 
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   find_package(${_pkg_name} REQUIRED)
@@ -156,6 +158,7 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
     set(CRATES_DEPENDENCIES "${CRATES_DEPENDENCIES}\n${_pkg_name} = { path = '${_crate_dep}' }")
   endforeach()
 endforeach()
+ament_index_register_resource("rust_crates")
 
 
 # needed to avoid multiple calls to the Rust generator trick copied from
